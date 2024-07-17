@@ -29,7 +29,7 @@ let SesionesController = class SesionesController {
     }
     async create(req, createSesionDto, res) {
         try {
-            const response = await this.sesionesService.create(createSesionDto, req.user);
+            const response = await this.sesionesService.create(createSesionDto);
             if (!response.ok) {
                 return res.status(400).json({ message: response.message, ok: false });
             }

@@ -12,7 +12,7 @@ export declare class SesionesService {
     private transcripcionRepository;
     private logRepository;
     constructor(sesionRepository: Repository<Sesion>, usuarioRepository: Repository<Usuario>, comisionesRepository: Repository<Comision>, transcripcionRepository: Repository<Transcripcion>, logRepository: Repository<Log>);
-    create(createSesionDto: CreateSesionDto, usuarioLogueado: Usuario): Promise<{
+    create(createSesionDto: CreateSesionDto): Promise<{
         ok: boolean;
         message: string;
         sesionSelected?: undefined;

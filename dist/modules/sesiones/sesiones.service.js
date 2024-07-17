@@ -29,13 +29,7 @@ let SesionesService = class SesionesService {
         this.transcripcionRepository = transcripcionRepository;
         this.logRepository = logRepository;
     }
-    async create(createSesionDto, usuarioLogueado) {
-        const usuario = this.usuarioRepository.findOne({
-            where: { id: usuarioLogueado.id },
-        });
-        if (!usuario) {
-            return { ok: false, message: 'Usuario no encontrado' };
-        }
+    async create(createSesionDto) {
         const prefijo = createSesionDto.prefix;
         const comision = await this.comisionesRepository.findOne({
             where: { prefijo },
