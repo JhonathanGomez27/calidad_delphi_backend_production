@@ -57,8 +57,8 @@ let SesionesService = class SesionesService {
         const entidadesTranscripcion = await Promise.all(createSesionDto.transcripcion.map(async (transcripcion) => {
             const nuevaTranscripcion = new transcription_entity_1.Transcripcion();
             nuevaTranscripcion.id_sesion = sesionSelected.id;
-            nuevaTranscripcion.textoTranscripcion = transcripcion.textoTranscripcion;
-            nuevaTranscripcion.textoCorregido = transcripcion.textoTranscripcion;
+            nuevaTranscripcion.textoTranscripcion = transcripcion.texto;
+            nuevaTranscripcion.textoCorregido = transcripcion.texto;
             nuevaTranscripcion.minuto = transcripcion.minuto;
             return nuevaTranscripcion;
         }));
