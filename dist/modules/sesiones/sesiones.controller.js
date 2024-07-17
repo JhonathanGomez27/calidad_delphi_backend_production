@@ -129,8 +129,6 @@ let SesionesController = class SesionesController {
 };
 exports.SesionesController = SesionesController;
 __decorate([
-    (0, decorators_1.Roles)(roles_model_1.Role.ADMIN),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthAccessGuard, roles_guard_1.RolesGuard),
     (0, common_1.Post)(''),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
