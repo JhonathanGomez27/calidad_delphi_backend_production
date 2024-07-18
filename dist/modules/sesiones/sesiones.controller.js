@@ -213,7 +213,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SesionesController.prototype, "getTranscripcionesSesion", null);
 __decorate([
-    (0, common_1.Get)('sincronizarSesion'),
+    (0, common_1.Post)('sincronizarSesion'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Res)()),
