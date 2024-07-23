@@ -51,9 +51,13 @@ __decorate([
     __metadata("design:type", Array)
 ], Usuario.prototype, "sesiones", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => transcription_entity_1.Transcripcion, transcripcion => transcripcion.usuario),
+    (0, typeorm_1.OneToMany)(() => transcription_entity_1.Transcripcion, transcripcion => transcripcion.usuarioAsignado),
     __metadata("design:type", Array)
-], Usuario.prototype, "transcripciones", void 0);
+], Usuario.prototype, "transcripcionesAsignadas", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => transcription_entity_1.Transcripcion, transcripcion => transcripcion.editadoPor),
+    __metadata("design:type", Array)
+], Usuario.prototype, "transcripcionesEditadas", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)

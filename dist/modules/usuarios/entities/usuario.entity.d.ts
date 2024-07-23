@@ -12,7 +12,8 @@ export declare class Usuario {
     rol: 'supervisor' | 'auditor' | 'admin';
     password: string;
     sesiones: Sesion[];
-    transcripciones: Transcripcion[];
+    transcripcionesAsignadas: Transcripcion[];
+    transcripcionesEditadas: Transcripcion[];
     login_status: boolean;
     is_active: boolean;
     createdAt: Date;

@@ -7,7 +7,9 @@ export declare class Transcripcion {
     textoTranscripcion: string;
     textoCorregido: string;
     minuto: number;
-    usuario: Usuario;
+    usuarioAsignado: Usuario;
+    usuario_asignado: number;
+    editadoPor: Usuario;
     editado_por: number;
     revisado: boolean;
     created_at: Date;

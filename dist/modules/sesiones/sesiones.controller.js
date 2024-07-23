@@ -87,6 +87,18 @@ let SesionesController = class SesionesController {
             return (0, error_message_1.handleDbError)(error);
         }
     }
+    async deleteSesion(req, id, res) {
+        try {
+            const response = await this.sesionesService.deleteSesion(req.user, id);
+            if (!response.ok) {
+                return res.status(400).json({ message: response.message, ok: false });
+            }
+            return res.json(response);
+        }
+        catch (error) {
+            return (0, error_message_1.handleDbError)(error);
+        }
+    }
     async prueba(req, res) {
         try {
             const response = await this.sesionesService.pruebas(req.body);
@@ -186,6 +198,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, Object, Number]),
     __metadata("design:returntype", Promise)
 ], SesionesController.prototype, "setUsersToSesion", null);
+__decorate([
+    (0, decorators_1.Roles)(roles_model_1.Role.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthAccessGuard, roles_guard_1.RolesGuard),
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number, Object]),
+    __metadata("design:returntype", Promise)
+], SesionesController.prototype, "deleteSesion", null);
 __decorate([
     (0, common_1.Post)('prueba'),
     __param(0, (0, common_1.Request)()),

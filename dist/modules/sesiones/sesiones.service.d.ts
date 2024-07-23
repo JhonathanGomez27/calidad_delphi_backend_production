@@ -55,15 +55,19 @@ export declare class SesionesService {
         ok: boolean;
         message: string;
     }>;
-    obtenerMinutosSesion(duracion: string, cantUsuarios?: number): Promise<any[]>;
+    obtenerMinutosSesion(duracion: number, cantUsuarios?: number): Promise<any[]>;
     asignarTranscripciones(sesionSelected: Sesion): Promise<{
         ok: boolean;
         message: string;
-        data: any;
+    }>;
+    deleteSesion(usuarioLogueado: Usuario, sesionId: number): Promise<{
+        ok: boolean;
+        message: string;
+        totalDeleted?: undefined;
     } | {
         ok: boolean;
         message: string;
-        data?: undefined;
+        totalDeleted: number;
     }>;
     pruebas(data: any): Promise<{
         ok: boolean;

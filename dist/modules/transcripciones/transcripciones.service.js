@@ -45,13 +45,22 @@ let TranscripcionesService = class TranscripcionesService {
         }
         if (usuario.rol !== 'auditor') {
             try {
-                const [transcripciones, total] = await this.transcripcionRepository.findAndCount({
-                    where: { id_sesion: sesion.id },
-                    select: ['id', 'textoTranscripcion', 'textoCorregido', 'minuto', 'revisado', 'editado_por'],
-                    order: { minuto: 'ASC' },
-                    skip: (pagina - 1) * limite,
-                    take: limite
-                });
+                const [transcripciones, total] = await this.transcripcionRepository
+                    .createQueryBuilder('transcripcion')
+                    .leftJoinAndSelect('transcripcion.usuarioAsignado', 'usuario')
+                    .select([
+                    'transcripcion.id',
+                    'transcripcion.textoTranscripcion',
+                    'transcripcion.textoCorregido',
+                    'transcripcion.minuto',
+                    'transcripcion.revisado',
+                    'usuario.nombre'
+                ])
+                    .where('transcripcion.id_sesion = :idSesion', { idSesion: sesion.id })
+                    .orderBy('transcripcion.minuto', 'ASC')
+                    .skip((pagina - 1) * limite)
+                    .take(limite)
+                    .getManyAndCount();
                 return {
                     ok: true,
                     sesion,
@@ -65,8 +74,8 @@ let TranscripcionesService = class TranscripcionesService {
         }
         sesion.usuarios = undefined;
         const [transcripciones, total] = await this.transcripcionRepository.findAndCount({
-            where: { id_sesion: sesion.id, editado_por: usuario.id },
-            select: ['id', 'textoTranscripcion', 'textoCorregido', 'minuto', 'revisado', 'editado_por'],
+            where: { id_sesion: sesion.id, usuario_asignado: usuario.id },
+            select: ['id', 'textoTranscripcion', 'textoCorregido', 'minuto', 'revisado', 'usuario_asignado'],
             order: { minuto: 'ASC' },
             skip: (pagina - 1) * limite,
             take: limite
@@ -97,7 +106,7 @@ let TranscripcionesService = class TranscripcionesService {
         try {
             const [transcripciones, total] = await this.transcripcionRepository.findAndCount({
                 where: { id_sesion: sesion.id },
-                select: ['id', 'textoTranscripcion', 'textoCorregido', 'minuto', 'revisado', 'editado_por'],
+                select: ['id', 'textoTranscripcion', 'textoCorregido', 'minuto', 'revisado', 'usuarioAsignado'],
                 order: { minuto: 'ASC' },
                 skip: (pagina - 1) * limite,
                 take: limite
@@ -127,7 +136,7 @@ let TranscripcionesService = class TranscripcionesService {
             return { ok: false, message: 'Transcripcion no encontrada' };
         }
         transcripcion.textoCorregido = data.textoCorregido;
-        transcripcion.editado_por = usuario.id;
+        transcripcion.editadoPor = usuario;
         transcripcion.updated_at = new Date();
         transcripcion.revisado = true;
         try {

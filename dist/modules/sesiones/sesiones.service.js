@@ -181,10 +181,8 @@ let SesionesService = class SesionesService {
         return { ok: true, message: 'Usuarios agregados a la sesion' };
     }
     async obtenerMinutosSesion(duracion, cantUsuarios = 1) {
-        const minutos = duracion.split(':');
-        const minutosTotales = parseInt(minutos[0]) * 60 + parseInt(minutos[1]) + (parseInt(minutos[2]) > 0 ? 1 : 0);
-        let minutosPorUsuario = Math.floor(minutosTotales / cantUsuarios);
-        let minutosExtra = minutosTotales % cantUsuarios;
+        let minutosPorUsuario = Math.floor(duracion / cantUsuarios);
+        let minutosExtra = duracion % cantUsuarios;
         let usuariosYminutos = Array(cantUsuarios).fill(minutosPorUsuario);
         if (minutosExtra > 0) {
             usuariosYminutos[usuariosYminutos.length - 1] += minutosExtra;
@@ -197,15 +195,18 @@ let SesionesService = class SesionesService {
             relations: ['usuarios'],
         });
         const usuarios = sesion.usuarios;
-        if (!usuarios.length) {
-            return { ok: false, message: 'No hay usuarios en la sesion', data: null };
+        if (usuarios.length === 0) {
+            await this.transcripcionRepository.update({ id_sesion: sesion.id }, { usuario_asignado: null });
+            return { ok: true, message: 'No hay usuarios en la sesion' };
         }
-        const minutosSesion = await this.obtenerMinutosSesion(sesion.duracion, usuarios.length);
+        const transcripcionesActuales = await this.transcripcionRepository.count({
+            where: { id_sesion: sesion.id },
+        });
+        const minutosSesion = await this.obtenerMinutosSesion(transcripcionesActuales, usuarios.length);
         const usuariosMinutos = [];
         for (let i = 0; i < usuarios.length; i++) {
             const minutos = minutosSesion[i];
             const skip = i * (i > 0 ? minutosSesion[i - 1] : 0);
-            console.log(skip);
             const [trasncripciones, total] = await this.transcripcionRepository.findAndCount({
                 where: { id_sesion: sesion.id },
                 order: { minuto: 'ASC' },
@@ -215,11 +216,29 @@ let SesionesService = class SesionesService {
             usuariosMinutos.push({ usuario: usuarios[i], minutos: trasncripciones });
             for (let j = 0; j < trasncripciones.length; j++) {
                 const transcripcion = trasncripciones[j];
-                transcripcion.usuario = usuarios[i];
+                transcripcion.usuarioAsignado = usuarios[i];
                 await this.transcripcionRepository.save(transcripcion);
             }
         }
         return { ok: true, message: 'Asignacion exitosa' };
+    }
+    async deleteSesion(usuarioLogueado, sesionId) {
+        const usuario = this.usuarioRepository.findOne({
+            where: { id: usuarioLogueado.id },
+        });
+        if (!usuario) {
+            return { ok: false, message: 'Usuario no encontrado' };
+        }
+        const sesion = await this.sesionRepository.findOne({
+            where: { id: sesionId },
+        });
+        if (!sesion) {
+            return { ok: false, message: 'Sesion no encontrada' };
+        }
+        const response = await this.transcripcionRepository.delete({ id_sesion: sesionId });
+        const totalDeleted = response.affected;
+        await this.sesionRepository.remove(sesion);
+        return { ok: true, message: 'Sesion eliminada', totalDeleted };
     }
     async pruebas(data) {
         const sesion = await this.sesionRepository.findOne({
@@ -230,7 +249,7 @@ let SesionesService = class SesionesService {
         if (!usuarios.length) {
             return { ok: false, message: 'No hay usuarios en la sesion', data: null };
         }
-        const minutosSesion = await this.obtenerMinutosSesion(sesion.duracion, usuarios.length);
+        const minutosSesion = await this.obtenerMinutosSesion(80, usuarios.length);
         const usuariosMinutos = [];
         for (let i = 0; i < usuarios.length; i++) {
             const minutos = minutosSesion[i];
@@ -245,7 +264,7 @@ let SesionesService = class SesionesService {
             usuariosMinutos.push({ usuario: usuarios[i], minutos: trasncripciones });
             for (let j = 0; j < trasncripciones.length; j++) {
                 const transcripcion = trasncripciones[j];
-                transcripcion.usuario = usuarios[i];
+                transcripcion.usuarioAsignado = usuarios[i];
                 await this.transcripcionRepository.save(transcripcion);
             }
         }

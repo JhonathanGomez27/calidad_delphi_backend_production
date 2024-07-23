@@ -42,10 +42,19 @@ __decorate([
     __metadata("design:type", Number)
 ], Transcripcion.prototype, "minuto", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => usuario_entity_1.Usuario, usuario => usuario.transcripciones),
+    (0, typeorm_1.ManyToOne)(() => usuario_entity_1.Usuario, usuario => usuario.transcripcionesAsignadas),
+    (0, typeorm_1.JoinColumn)({ name: 'usuario_asignado' }),
+    __metadata("design:type", usuario_entity_1.Usuario)
+], Transcripcion.prototype, "usuarioAsignado", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], Transcripcion.prototype, "usuario_asignado", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => usuario_entity_1.Usuario, usuario => usuario.transcripcionesEditadas),
     (0, typeorm_1.JoinColumn)({ name: 'editado_por' }),
     __metadata("design:type", usuario_entity_1.Usuario)
-], Transcripcion.prototype, "usuario", void 0);
+], Transcripcion.prototype, "editadoPor", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Number)
