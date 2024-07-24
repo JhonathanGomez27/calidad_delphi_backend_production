@@ -17,6 +17,10 @@ declare const _default: (() => {
         jwtForgotPasswordSecret: string;
         jwtForgotPasswordExpiresTime: string;
     };
+    telegram: {
+        token: string;
+        chatId: string;
+    };
 }) & import("@nestjs/config").ConfigFactoryKeyHost<{
     database: {
         dbname: string;
@@ -35,6 +39,10 @@ declare const _default: (() => {
         jwtRefreshTokenExpiresTime: string;
         jwtForgotPasswordSecret: string;
         jwtForgotPasswordExpiresTime: string;
+    };
+    telegram: {
+        token: string;
+        chatId: string;
     };
 }>;
 export default _default;

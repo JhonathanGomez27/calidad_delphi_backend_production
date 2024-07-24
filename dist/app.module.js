@@ -21,6 +21,7 @@ const logs_module_1 = require("./modules/logs/logs.module");
 const comisiones_module_1 = require("./modules/comisiones/comisiones.module");
 const sesiones_module_1 = require("./modules/sesiones/sesiones.module");
 const transcripciones_module_1 = require("./modules/transcripciones/transcripciones.module");
+const telegram_module_1 = require("./modules/telegram/telegram.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -37,7 +38,8 @@ exports.AppModule = AppModule = __decorate([
             comisiones_module_1.ComisionesModule,
             sesiones_module_1.SesionesModule,
             transcripciones_module_1.TranscripcionesModule,
-            typeorm_1.TypeOrmModule.forFeature([usuario_entity_1.Usuario, logs_entity_1.Log])
+            typeorm_1.TypeOrmModule.forFeature([usuario_entity_1.Usuario, logs_entity_1.Log]),
+            telegram_module_1.TelegramModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

@@ -5,13 +5,15 @@ import { Comision } from '../comisiones/entities/comision.entity';
 import { Log } from '../logs/entities/logs.entity';
 import { CreateSesionDto } from './dto/create-sesion.dto';
 import { Transcripcion } from '../transcripciones/entities/transcription.entity';
+import { TelegramService } from '../telegram/telegram.service';
 export declare class SesionesService {
     private sesionRepository;
     private usuarioRepository;
     private comisionesRepository;
     private transcripcionRepository;
     private logRepository;
-    constructor(sesionRepository: Repository<Sesion>, usuarioRepository: Repository<Usuario>, comisionesRepository: Repository<Comision>, transcripcionRepository: Repository<Transcripcion>, logRepository: Repository<Log>);
+    private readonly telegramService;
+    constructor(sesionRepository: Repository<Sesion>, usuarioRepository: Repository<Usuario>, comisionesRepository: Repository<Comision>, transcripcionRepository: Repository<Transcripcion>, logRepository: Repository<Log>, telegramService: TelegramService);
     create(createSesionDto: CreateSesionDto): Promise<{
         ok: boolean;
         message: string;

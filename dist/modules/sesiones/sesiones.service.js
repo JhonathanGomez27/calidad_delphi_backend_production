@@ -21,13 +21,15 @@ const usuario_entity_1 = require("../usuarios/entities/usuario.entity");
 const comision_entity_1 = require("../comisiones/entities/comision.entity");
 const logs_entity_1 = require("../logs/entities/logs.entity");
 const transcription_entity_1 = require("../transcripciones/entities/transcription.entity");
+const telegram_service_1 = require("../telegram/telegram.service");
 let SesionesService = class SesionesService {
-    constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, logRepository) {
+    constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, logRepository, telegramService) {
         this.sesionRepository = sesionRepository;
         this.usuarioRepository = usuarioRepository;
         this.comisionesRepository = comisionesRepository;
         this.transcripcionRepository = transcripcionRepository;
         this.logRepository = logRepository;
+        this.telegramService = telegramService;
     }
     async create(createSesionDto) {
         const prefijo = createSesionDto.prefix;
@@ -52,6 +54,8 @@ let SesionesService = class SesionesService {
             sesionSelected = newSesion;
         }
         else {
+            const message = `<strong>ATENCIÓN CALIDAD:</strong> Acaba de llegar una transcripción de la comisión: <strong>${comision.nombre}</strong> con nombre de sesión: <strong>${newSesion.nombre}</strong>`;
+            await this.telegramService.sendMessage(message);
             sesionSelected = await this.sesionRepository.save(newSesion);
         }
         const entidadesTranscripcion = await Promise.all(createSesionDto.transcripcion.map(async (transcripcion) => {
@@ -254,7 +258,6 @@ let SesionesService = class SesionesService {
         for (let i = 0; i < usuarios.length; i++) {
             const minutos = minutosSesion[i];
             const skip = i * (i > 0 ? minutosSesion[i - 1] : 0);
-            console.log(skip);
             const [trasncripciones, total] = await this.transcripcionRepository.findAndCount({
                 where: { id_sesion: sesion.id },
                 order: { minuto: 'ASC' },
@@ -305,7 +308,12 @@ let SesionesService = class SesionesService {
             return { ok: false, message: 'Sesion no encontrada' };
         }
         sesion.estado = sesion_entity_1.estadoEnum.SINCRONIZADO;
+        const comision = await this.comisionesRepository.findOne({
+            where: { id: sesion.comision_id },
+        });
         await this.sesionRepository.save(sesion);
+        const message = `<strong>ATENCIÓN OPERATIVO:</strong> la transcripción de la comisión: <strong>${comision.nombre}</strong> con nombre de sesión: <strong>${sesion.nombre}</strong> está en proceso de generación de archivos, en los próximos <strong>10 minutos</strong> puede dirigirse a relatoría y realizar el envío respectivo.`;
+        await this.telegramService.sendMessage(message);
         return { ok: true, message: 'Sesion sincronizada' };
     }
 };
@@ -321,6 +329,7 @@ exports.SesionesService = SesionesService = __decorate([
         typeorm_1.Repository,
         typeorm_1.Repository,
         typeorm_1.Repository,
-        typeorm_1.Repository])
+        typeorm_1.Repository,
+        telegram_service_1.TelegramService])
 ], SesionesService);
 //# sourceMappingURL=sesiones.service.js.map

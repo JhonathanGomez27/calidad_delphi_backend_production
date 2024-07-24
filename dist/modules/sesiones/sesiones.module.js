@@ -17,6 +17,7 @@ const logs_entity_1 = require("../logs/entities/logs.entity");
 const usuario_entity_1 = require("../usuarios/entities/usuario.entity");
 const sesion_entity_1 = require("./entities/sesion.entity");
 const transcription_entity_1 = require("../transcripciones/entities/transcription.entity");
+const telegram_service_1 = require("../telegram/telegram.service");
 let SesionesModule = class SesionesModule {
 };
 exports.SesionesModule = SesionesModule;
@@ -27,7 +28,7 @@ exports.SesionesModule = SesionesModule = __decorate([
             auth_module_1.AuthModule
         ],
         controllers: [sesiones_controller_1.SesionesController],
-        providers: [sesiones_service_1.SesionesService]
+        providers: [sesiones_service_1.SesionesService, telegram_service_1.TelegramService]
     })
 ], SesionesModule);
 //# sourceMappingURL=sesiones.module.js.map

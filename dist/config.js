@@ -20,6 +20,10 @@ exports.default = (0, config_1.registerAs)('config', () => {
             jwtRefreshTokenExpiresTime: process.env.JWT_REFRESH_EXPIRES_TIME,
             jwtForgotPasswordSecret: process.env.JWT_FORGOT_PASSWORD_SECRET,
             jwtForgotPasswordExpiresTime: process.env.JWT_FORGOT_PASSWORD_EXPIRES_TIME,
+        },
+        telegram: {
+            token: process.env.TELEGRAM_BOT_TOKEN,
+            chatId: process.env.TELEGRAM_CHAT_ID,
         }
     };
 });
