@@ -103,10 +103,119 @@ let TranscripcionesService = class TranscripcionesService {
         if (!sesion) {
             return { ok: false, message: 'Sesion no encontrada' };
         }
+        sesion.usuarios = undefined;
         try {
             const [transcripciones, total] = await this.transcripcionRepository.findAndCount({
                 where: { id_sesion: sesion.id },
-                select: ['id', 'textoTranscripcion', 'textoCorregido', 'minuto', 'revisado', 'usuarioAsignado'],
+                select: ['id', 'textoTranscripcion', 'textoCorregido', 'minuto', 'revisado', 'usuario_asignado'],
+                order: { minuto: 'ASC' },
+                skip: (pagina - 1) * limite,
+                take: limite
+            });
+            return {
+                ok: true,
+                sesion,
+                transcripciones,
+                total
+            };
+        }
+        catch (error) {
+            return { ok: false, message: 'Error al obtener las transcripciones de la sesion' };
+        }
+    }
+    async getTranscripcionesRevisadas(usuarioLogueado, idSesion, pagina, limite) {
+        try {
+            const usuario = await this.usuarioRepository.findOne({
+                where: { id: usuarioLogueado.id },
+            });
+            if (!usuario) {
+                return { ok: false, message: 'Usuario no encontrado' };
+            }
+            const sesion = await this.sesionRepository.createQueryBuilder('sesion')
+                .leftJoinAndSelect('sesion.usuarios', 'usuario')
+                .where('sesion.id = :idSesion', { idSesion })
+                .select(['sesion.id', 'sesion.nombre', 'sesion.fecha', 'sesion.duracion', 'sesion.estado', 'sesion.comision_id'])
+                .addSelect(['usuario.id', 'usuario.email', 'usuario.nombre', 'usuario.rol', 'usuario.is_active'])
+                .getOne();
+            if (!sesion) {
+                return { ok: false, message: 'Sesion no encontrada' };
+            }
+            if (usuario.rol !== 'auditor') {
+                const [transcripciones, total] = await this.transcripcionRepository
+                    .createQueryBuilder('transcripcion')
+                    .leftJoinAndSelect('transcripcion.usuarioAsignado', 'usuario')
+                    .select(['transcripcion.id', 'transcripcion.textoTranscripcion', 'transcripcion.textoCorregido', 'transcripcion.minuto', 'transcripcion.revisado', 'usuario.nombre'])
+                    .where('transcripcion.id_sesion = :idSesion', { idSesion: sesion.id })
+                    .andWhere('transcripcion.revisado = true')
+                    .orderBy('transcripcion.minuto', 'ASC')
+                    .skip((pagina - 1) * limite)
+                    .take(limite)
+                    .getManyAndCount();
+                return {
+                    ok: true,
+                    sesion,
+                    transcripciones,
+                    total
+                };
+            }
+            sesion.usuarios = undefined;
+            const [transcripciones, total] = await this.transcripcionRepository.findAndCount({
+                where: { id_sesion: sesion.id, usuario_asignado: usuario.id, revisado: true },
+                select: ['id', 'textoTranscripcion', 'textoCorregido', 'minuto', 'revisado', 'usuario_asignado'],
+                order: { minuto: 'ASC' },
+                skip: (pagina - 1) * limite,
+                take: limite
+            });
+            return {
+                ok: true,
+                sesion,
+                transcripciones,
+                total
+            };
+        }
+        catch (error) {
+            return { ok: false, message: 'Error al obtener las transcripciones de la sesion' };
+        }
+    }
+    async getTranscripcionesPendientes(usuarioLogueado, idSesion, pagina, limite) {
+        try {
+            const usuario = await this.usuarioRepository.findOne({
+                where: { id: usuarioLogueado.id },
+            });
+            if (!usuario) {
+                return { ok: false, message: 'Usuario no encontrado' };
+            }
+            const sesion = await this.sesionRepository.createQueryBuilder('sesion')
+                .leftJoinAndSelect('sesion.usuarios', 'usuario')
+                .where('sesion.id = :idSesion', { idSesion })
+                .select(['sesion.id', 'sesion.nombre', 'sesion.fecha', 'sesion.duracion', 'sesion.estado', 'sesion.comision_id'])
+                .addSelect(['usuario.id', 'usuario.email', 'usuario.nombre', 'usuario.rol', 'usuario.is_active'])
+                .getOne();
+            if (!sesion) {
+                return { ok: false, message: 'Sesion no encontrada' };
+            }
+            if (usuario.rol !== 'auditor') {
+                const [transcripciones, total] = await this.transcripcionRepository
+                    .createQueryBuilder('transcripcion')
+                    .leftJoinAndSelect('transcripcion.usuarioAsignado', 'usuario')
+                    .select(['transcripcion.id', 'transcripcion.textoTranscripcion', 'transcripcion.textoCorregido', 'transcripcion.minuto', 'transcripcion.revisado', 'usuario.nombre'])
+                    .where('transcripcion.id_sesion = :idSesion', { idSesion: sesion.id })
+                    .andWhere('transcripcion.revisado = false')
+                    .orderBy('transcripcion.minuto', 'ASC')
+                    .skip((pagina - 1) * limite)
+                    .take(limite)
+                    .getManyAndCount();
+                return {
+                    ok: true,
+                    sesion,
+                    transcripciones,
+                    total
+                };
+            }
+            sesion.usuarios = undefined;
+            const [transcripciones, total] = await this.transcripcionRepository.findAndCount({
+                where: { id_sesion: sesion.id, usuario_asignado: usuario.id, revisado: false },
+                select: ['id', 'textoTranscripcion', 'textoCorregido', 'minuto', 'revisado', 'usuario_asignado'],
                 order: { minuto: 'ASC' },
                 skip: (pagina - 1) * limite,
                 take: limite

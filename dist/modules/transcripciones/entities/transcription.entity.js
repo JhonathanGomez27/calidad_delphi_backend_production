@@ -72,6 +72,7 @@ __decorate([
     __metadata("design:type", Date)
 ], Transcripcion.prototype, "updated_at", void 0);
 exports.Transcripcion = Transcripcion = __decorate([
-    (0, typeorm_1.Entity)({ name: 'transcripciones' })
+    (0, typeorm_1.Entity)({ name: 'transcripciones' }),
+    (0, typeorm_1.Unique)(['id_sesion', 'minuto'])
 ], Transcripcion);
 //# sourceMappingURL=transcription.entity.js.map

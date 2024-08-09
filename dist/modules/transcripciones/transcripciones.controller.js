@@ -48,6 +48,30 @@ let TranscripcionesController = class TranscripcionesController {
             return (0, error_message_1.handleDbError)(error);
         }
     }
+    async getTranscripcionesPendientesBySesion(sesionId, req, query, res) {
+        try {
+            const response = await this.transcripcionesService.getTranscripcionesPendientes(req.user, sesionId, query.page, query.limit);
+            if (!response.ok) {
+                return res.status(400).json({ message: response.message, ok: false });
+            }
+            return res.json(response);
+        }
+        catch (error) {
+            return (0, error_message_1.handleDbError)(error);
+        }
+    }
+    async getTranscripcionesRevisadasBySesion(sesionId, req, query, res) {
+        try {
+            const response = await this.transcripcionesService.getTranscripcionesRevisadas(req.user, sesionId, query.page, query.limit);
+            if (!response.ok) {
+                return res.status(400).json({ message: response.message, ok: false });
+            }
+            return res.json(response);
+        }
+        catch (error) {
+            return (0, error_message_1.handleDbError)(error);
+        }
+    }
     async updateTranscripcionRevisada(transcripcionId, req) {
         try {
             const response = await this.transcripcionesService.updateTranscripcionRevisada(req.user, transcripcionId, req.body);
@@ -88,6 +112,32 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object, filtersPaginatedQuery_1.FiltersPaginatedQuery, Object]),
     __metadata("design:returntype", Promise)
 ], TranscripcionesController.prototype, "getAllTranscripcionesBySesion", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthAccessGuard, roles_guard_1.RolesGuard),
+    (0, common_1.Get)('sesion/pendientes/:sesionId'),
+    (0, swagger_1.ApiQuery)({ name: 'pagina', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'limite', required: false }),
+    __param(0, (0, common_1.Param)('sesionId')),
+    __param(1, (0, common_1.Request)()),
+    __param(2, (0, common_1.Query)()),
+    __param(3, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, filtersPaginatedQuery_1.FiltersPaginatedQuery, Object]),
+    __metadata("design:returntype", Promise)
+], TranscripcionesController.prototype, "getTranscripcionesPendientesBySesion", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthAccessGuard, roles_guard_1.RolesGuard),
+    (0, common_1.Get)('sesion/revisadas/:sesionId'),
+    (0, swagger_1.ApiQuery)({ name: 'pagina', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'limite', required: false }),
+    __param(0, (0, common_1.Param)('sesionId')),
+    __param(1, (0, common_1.Request)()),
+    __param(2, (0, common_1.Query)()),
+    __param(3, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, filtersPaginatedQuery_1.FiltersPaginatedQuery, Object]),
+    __metadata("design:returntype", Promise)
+], TranscripcionesController.prototype, "getTranscripcionesRevisadasBySesion", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthAccessGuard, roles_guard_1.RolesGuard),
     (0, common_1.Patch)(':transcripcionId'),

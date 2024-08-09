@@ -30,6 +30,11 @@ let TelegramService = TelegramService_1 = class TelegramService {
         }
         TelegramService_1.bot = new TelegramBot(this.token, { polling: true });
         TelegramService_1.bot.on('message', (msg) => {
+            console.log('Mensaje recibido:', JSON.stringify(msg, null, 2));
+            const chatId = msg.chat.id;
+            console.log(`Chat ID: ${chatId}`);
+            const text = msg.text;
+            console.log(text);
         });
     }
     async sendMessage(message) {
