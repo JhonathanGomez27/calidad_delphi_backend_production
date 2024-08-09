@@ -219,13 +219,16 @@ let SesionesService = class SesionesService {
             where: { id_sesion: sesion.id, revisado: false },
         });
         const minutosSesion = await this.obtenerMinutosSesion(transcripcionesActuales, usuarios.length);
+        console.log(minutosSesion);
+        let acumuladorSkip = 0;
         for (let i = 0; i < usuarios.length; i++) {
             const minutos = minutosSesion[i];
-            const skip = i * (i > 0 ? minutosSesion[i - 1] : 0);
+            const skip = i > 0 ? minutosSesion[i - 1] : 0;
+            acumuladorSkip = acumuladorSkip + skip;
             const [transcripciones, total] = await this.transcripcionRepository.findAndCount({
                 where: { id_sesion: sesion.id, revisado: false },
                 order: { minuto: 'ASC' },
-                skip: skip,
+                skip: acumuladorSkip,
                 take: minutos,
             });
             const transcripcionesIds = transcripciones.map(transcripcion => transcripcion.id);
