@@ -65,6 +65,7 @@ let SesionesService = class SesionesService {
             nuevaTranscripcion.textoTranscripcion = transcripcion.texto;
             nuevaTranscripcion.textoCorregido = transcripcion.texto;
             nuevaTranscripcion.minuto = transcripcion.minuto;
+            nuevaTranscripcion.usuario_asignado = null;
             return nuevaTranscripcion;
         }));
         try {
@@ -190,11 +191,10 @@ let SesionesService = class SesionesService {
         sesion.usuarios = usuarios;
         await this.sesionRepository.save(sesion);
         if (usuarioEliminado !== null && usuarios.length > 0) {
-            console.log("Eliminar usuario");
             await this.asignarTranscripcionesDeleteUsuario(sesion, usuarioEliminado);
         }
         else {
-            await this.asignarTranscripciones(sesion);
+            await this.asignarTranscripcionesAddUsuario(sesion);
         }
         return { ok: true, message: 'Usuarios agregados a la sesion' };
     }
@@ -215,11 +215,34 @@ let SesionesService = class SesionesService {
             await this.transcripcionRepository.update({ id_sesion: sesion.id }, { usuario_asignado: null });
             return { ok: true, message: 'No hay usuarios en la sesion' };
         }
+        let transcripciones;
+        transcripciones = await this.transcripcionRepository.find({
+            where: { id_sesion: sesion.id, usuario_asignado: (0, typeorm_1.IsNull)() },
+        });
+        const totalUsuarios = usuarios.length;
+        const updatePromises = transcripciones.map((transcripcion, i) => {
+            const usuarioId = usuarios[i % totalUsuarios].id;
+            return this.transcripcionRepository.update(transcripcion.id, {
+                usuario_asignado: usuarioId,
+            });
+        });
+        await Promise.all(updatePromises);
+        return { ok: true, message: 'Asignacion exitosa' };
+    }
+    async asignarTranscripcionesAddUsuario(sesionSelected) {
+        const sesion = await this.sesionRepository.findOne({
+            where: { id: sesionSelected.id },
+            relations: ['usuarios'],
+        });
+        const usuarios = sesion.usuarios;
+        if (usuarios.length === 0) {
+            await this.transcripcionRepository.update({ id_sesion: sesion.id }, { usuario_asignado: null });
+            return { ok: true, message: 'No hay usuarios en la sesion' };
+        }
         const transcripcionesActuales = await this.transcripcionRepository.count({
             where: { id_sesion: sesion.id, revisado: false },
         });
         const minutosSesion = await this.obtenerMinutosSesion(transcripcionesActuales, usuarios.length);
-        console.log(minutosSesion);
         let acumuladorSkip = 0;
         for (let i = 0; i < usuarios.length; i++) {
             const minutos = minutosSesion[i];
@@ -237,23 +260,28 @@ let SesionesService = class SesionesService {
         return { ok: true, message: 'Asignacion exitosa' };
     }
     async asignarTranscripcionesDeleteUsuario(sesionSelected, usuarioEliminadoId) {
-        const sesion = await this.sesionRepository.findOne({
-            where: { id: sesionSelected.id },
-            relations: ['usuarios'],
-        });
-        const usuarios = sesion.usuarios;
-        const [transcripciones, total] = await this.transcripcionRepository.findAndCount({
-            where: { id_sesion: sesion.id, usuario_asignado: usuarioEliminadoId },
-        });
-        const totalUsuarios = usuarios.length;
-        const updatePromises = transcripciones.map((transcripcion, i) => {
-            const usuarioId = usuarios[i % totalUsuarios].id;
-            return this.transcripcionRepository.update(transcripcion.id, {
-                usuario_asignado: usuarioId,
+        try {
+            const sesion = await this.sesionRepository.findOne({
+                where: { id: sesionSelected.id },
+                relations: ['usuarios'],
             });
-        });
-        await Promise.all(updatePromises);
-        return { ok: true, message: 'Asignacion exitosa' };
+            const usuarios = sesion.usuarios;
+            const [transcripciones, total] = await this.transcripcionRepository.findAndCount({
+                where: { id_sesion: sesion.id, usuario_asignado: usuarioEliminadoId },
+            });
+            const totalUsuarios = usuarios.length;
+            const updatePromises = transcripciones.map((transcripcion, i) => {
+                const usuarioId = usuarios[i % totalUsuarios].id;
+                return this.transcripcionRepository.update(transcripcion.id, {
+                    usuario_asignado: usuarioId,
+                });
+            });
+            await Promise.all(updatePromises);
+            return { ok: true, message: 'Asignacion exitosa' };
+        }
+        catch (error) {
+            return { ok: false, message: 'Error al asignar transcripciones' };
+        }
     }
     async deleteSesion(usuarioLogueado, sesionId) {
         const usuario = this.usuarioRepository.findOne({

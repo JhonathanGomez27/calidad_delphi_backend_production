@@ -62,6 +62,10 @@ export declare class SesionesService {
         ok: boolean;
         message: string;
     }>;
+    asignarTranscripcionesAddUsuario(sesionSelected: Sesion): Promise<{
+        ok: boolean;
+        message: string;
+    }>;
     asignarTranscripcionesDeleteUsuario(sesionSelected: Sesion, usuarioEliminadoId: number): Promise<{
         ok: boolean;
         message: string;
