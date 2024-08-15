@@ -11,9 +11,9 @@ export declare class SesionesService {
     private usuarioRepository;
     private comisionesRepository;
     private transcripcionRepository;
-    private logRepository;
+    private logsRepository;
     private readonly telegramService;
-    constructor(sesionRepository: Repository<Sesion>, usuarioRepository: Repository<Usuario>, comisionesRepository: Repository<Comision>, transcripcionRepository: Repository<Transcripcion>, logRepository: Repository<Log>, telegramService: TelegramService);
+    constructor(sesionRepository: Repository<Sesion>, usuarioRepository: Repository<Usuario>, comisionesRepository: Repository<Comision>, transcripcionRepository: Repository<Transcripcion>, logsRepository: Repository<Log>, telegramService: TelegramService);
     create(createSesionDto: CreateSesionDto): Promise<{
         ok: boolean;
         message: string;
@@ -105,6 +105,10 @@ export declare class SesionesService {
         message?: undefined;
     }>;
     sincronizarSesion(body: any): Promise<{
+        ok: boolean;
+        message: string;
+    }>;
+    createLog(usuario: Usuario, action: string, descripcion: string): Promise<{
         ok: boolean;
         message: string;
     }>;

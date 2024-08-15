@@ -19,11 +19,12 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const logs_entity_1 = require("../logs/entities/logs.entity");
 const hashing_service_1 = require("../../providers/hashing.service");
+const logs_messages_1 = require("../../utils/logs.messages");
 let UsuariosService = class UsuariosService {
-    constructor(usuarioRepository, hashingService, logRepository) {
+    constructor(usuarioRepository, hashingService, logsRepository) {
         this.usuarioRepository = usuarioRepository;
         this.hashingService = hashingService;
-        this.logRepository = logRepository;
+        this.logsRepository = logsRepository;
     }
     async onModuleInit() {
         const userCount = await this.usuarioRepository.count();
@@ -40,7 +41,7 @@ let UsuariosService = class UsuariosService {
         await this.usuarioRepository.save(defaultUser);
     }
     async create(createUsuarioDto, usuarioLogueado) {
-        const usuario = this.usuarioRepository.findOne({
+        const usuario = await this.usuarioRepository.findOne({
             where: { id: usuarioLogueado.id }
         });
         if (!usuario) {
@@ -64,13 +65,14 @@ let UsuariosService = class UsuariosService {
         newUser.password = await this.hashingService.hash(createUsuarioDto.password);
         newUser.rol = createUsuarioDto.rol;
         await this.usuarioRepository.save(newUser);
+        await this.createLog(usuarioLogueado, logs_messages_1.logsEnum.REGISTRAR_USUARIO, `Usuario ${newUser.nombre} creado por ${usuario.nombre}`);
         return {
             ok: true,
             message: 'Usuario creado con exito'
         };
     }
     async update(id, updateUsuarioDto, usuarioLogueado) {
-        const usuario = this.usuarioRepository.findOne({
+        const usuario = await this.usuarioRepository.findOne({
             where: { id: usuarioLogueado.id }
         });
         if (!usuario) {
@@ -102,6 +104,7 @@ let UsuariosService = class UsuariosService {
             existUser.rol = updateUsuarioDto.rol;
         }
         await this.usuarioRepository.save(existUser);
+        await this.createLog(usuarioLogueado, logs_messages_1.logsEnum.EDITAR_USUARIO, `Usuario ${existUser.nombre} actualizado por ${usuario.nombre}`);
         return {
             ok: true,
             message: 'Usuario actualizado con exito',
@@ -174,7 +177,7 @@ let UsuariosService = class UsuariosService {
         };
     }
     async getOne(id, usuarioLogueado) {
-        const usuario = this.usuarioRepository.findOne({
+        const usuario = await this.usuarioRepository.findOne({
             where: { id: usuarioLogueado.id }
         });
         if (!usuario) {
@@ -190,7 +193,7 @@ let UsuariosService = class UsuariosService {
         };
     }
     async setActive(id, usuarioLogueado) {
-        const usuario = this.usuarioRepository.findOne({
+        const usuario = await this.usuarioRepository.findOne({
             where: { id: usuarioLogueado.id }
         });
         if (!usuario) {
@@ -203,6 +206,12 @@ let UsuariosService = class UsuariosService {
         user.is_active = !user.is_active;
         user.login_status = false;
         await this.usuarioRepository.save(user);
+        if (user.is_active) {
+            await this.createLog(usuarioLogueado, logs_messages_1.logsEnum.ACTIVAR_USUARIO, `Usuario ${user.nombre} activado por ${usuario.nombre}`);
+        }
+        else {
+            await this.createLog(usuarioLogueado, logs_messages_1.logsEnum.ACTIVAR_USUARIO, `Usuario ${user.nombre} desactivado por ${usuario.nombre}`);
+        }
         return {
             ok: true,
             message: 'Usuario actualizado con exito'
@@ -217,10 +226,24 @@ let UsuariosService = class UsuariosService {
         }
         userLogout.login_status = false;
         await this.usuarioRepository.save(userLogout);
+        await this.createLog(user, logs_messages_1.logsEnum.CERRAR_SESION, `Sesión cerrada por ${userLogout.nombre}`);
         return {
             ok: true,
             message: 'Sesión cerrada con exito',
         };
+    }
+    async createLog(usuario, action, descripcion) {
+        try {
+            let newLog = new logs_entity_1.Log();
+            newLog.action = action;
+            newLog.descripcion = descripcion;
+            newLog.id_usuario = usuario;
+            await this.logsRepository.save(newLog);
+            return { ok: true, message: 'Log creado con exito.' };
+        }
+        catch (error) {
+            return { ok: false, message: 'Error al crear el log.' };
+        }
     }
 };
 exports.UsuariosService = UsuariosService;

@@ -10,11 +10,19 @@ exports.LogsModule = void 0;
 const common_1 = require("@nestjs/common");
 const logs_controller_1 = require("./logs.controller");
 const logs_service_1 = require("./logs.service");
+const typeorm_1 = require("@nestjs/typeorm");
+const usuario_entity_1 = require("../usuarios/entities/usuario.entity");
+const logs_entity_1 = require("./entities/logs.entity");
+const auth_module_1 = require("../auth/auth.module");
 let LogsModule = class LogsModule {
 };
 exports.LogsModule = LogsModule;
 exports.LogsModule = LogsModule = __decorate([
     (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([logs_entity_1.Log, usuario_entity_1.Usuario]),
+            auth_module_1.AuthModule
+        ],
         controllers: [logs_controller_1.LogsController],
         providers: [logs_service_1.LogsService]
     })

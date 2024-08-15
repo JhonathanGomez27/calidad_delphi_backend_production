@@ -16,13 +16,14 @@ const logs_entity_1 = require("../logs/entities/logs.entity");
 const usuario_entity_1 = require("../usuarios/entities/usuario.entity");
 const sesion_entity_1 = require("../sesiones/entities/sesion.entity");
 const transcription_entity_1 = require("./entities/transcription.entity");
+const comision_entity_1 = require("../comisiones/entities/comision.entity");
 let TranscripcionesModule = class TranscripcionesModule {
 };
 exports.TranscripcionesModule = TranscripcionesModule;
 exports.TranscripcionesModule = TranscripcionesModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([logs_entity_1.Log, usuario_entity_1.Usuario, sesion_entity_1.Sesion, transcription_entity_1.Transcripcion]),
+            typeorm_1.TypeOrmModule.forFeature([logs_entity_1.Log, usuario_entity_1.Usuario, sesion_entity_1.Sesion, transcription_entity_1.Transcripcion, comision_entity_1.Comision]),
             auth_module_1.AuthModule
         ],
         controllers: [transcripciones_controller_1.TranscripcionesController],

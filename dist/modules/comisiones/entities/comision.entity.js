@@ -36,6 +36,10 @@ __decorate([
     __metadata("design:type", Array)
 ], Comision.prototype, "sesiones", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: true }),
+    __metadata("design:type", Boolean)
+], Comision.prototype, "puntuacion", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Comision.prototype, "created_at", void 0);

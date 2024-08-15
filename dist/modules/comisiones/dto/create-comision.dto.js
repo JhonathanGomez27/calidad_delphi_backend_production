@@ -29,4 +29,9 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateComisionDto.prototype, "prefijo", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Boolean)
+], CreateComisionDto.prototype, "puntuacion", void 0);
 //# sourceMappingURL=create-comision.dto.js.map

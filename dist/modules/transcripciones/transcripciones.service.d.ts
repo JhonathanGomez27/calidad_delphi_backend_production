@@ -3,12 +3,14 @@ import { Repository } from 'typeorm';
 import { Log } from '../logs/entities/logs.entity';
 import { Transcripcion } from './entities/transcription.entity';
 import { Sesion } from '../sesiones/entities/sesion.entity';
+import { Comision } from '../comisiones/entities/comision.entity';
 export declare class TranscripcionesService {
     private usuarioRepository;
-    private logRepository;
+    private logsRepository;
     private transcripcionRepository;
     private sesionRepository;
-    constructor(usuarioRepository: Repository<Usuario>, logRepository: Repository<Log>, transcripcionRepository: Repository<Transcripcion>, sesionRepository: Repository<Sesion>);
+    private comisionesRepository;
+    constructor(usuarioRepository: Repository<Usuario>, logsRepository: Repository<Log>, transcripcionRepository: Repository<Transcripcion>, sesionRepository: Repository<Sesion>, comisionesRepository: Repository<Comision>);
     getTranscriptionsBySesion(usuarioLogueado: Usuario, idSesion: number, pagina: number, limite: number): Promise<{
         ok: boolean;
         message: string;
@@ -62,6 +64,10 @@ export declare class TranscripcionesService {
         message?: undefined;
     }>;
     updateTranscripcionRevisada(usuarioLogueado: Usuario, id: number, data: any): Promise<{
+        ok: boolean;
+        message: string;
+    }>;
+    createLog(usuario: Usuario, action: string, descripcion: string): Promise<{
         ok: boolean;
         message: string;
     }>;

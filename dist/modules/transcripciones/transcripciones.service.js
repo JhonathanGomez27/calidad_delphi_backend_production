@@ -20,12 +20,15 @@ const typeorm_2 = require("typeorm");
 const logs_entity_1 = require("../logs/entities/logs.entity");
 const transcription_entity_1 = require("./entities/transcription.entity");
 const sesion_entity_1 = require("../sesiones/entities/sesion.entity");
+const comision_entity_1 = require("../comisiones/entities/comision.entity");
+const logs_messages_1 = require("../../utils/logs.messages");
 let TranscripcionesService = class TranscripcionesService {
-    constructor(usuarioRepository, logRepository, transcripcionRepository, sesionRepository) {
+    constructor(usuarioRepository, logsRepository, transcripcionRepository, sesionRepository, comisionesRepository) {
         this.usuarioRepository = usuarioRepository;
-        this.logRepository = logRepository;
+        this.logsRepository = logsRepository;
         this.transcripcionRepository = transcripcionRepository;
         this.sesionRepository = sesionRepository;
+        this.comisionesRepository = comisionesRepository;
     }
     async getTranscriptionsBySesion(usuarioLogueado, idSesion, pagina, limite) {
         const usuario = await this.usuarioRepository.findOne({
@@ -244,16 +247,40 @@ let TranscripcionesService = class TranscripcionesService {
         if (!transcripcion) {
             return { ok: false, message: 'Transcripcion no encontrada' };
         }
-        transcripcion.textoCorregido = data.textoCorregido;
+        const sesion = await this.sesionRepository.findOne({
+            where: { id: transcripcion.id_sesion },
+            relations: ['comision']
+        });
+        const comision = sesion.comision;
+        let textoCorregido = data.textoCorregido;
+        if (comision.puntuacion) {
+            textoCorregido = textoCorregido.replace(/,/g, '');
+            textoCorregido = textoCorregido.replace(/\./g, '');
+        }
+        transcripcion.textoCorregido = textoCorregido;
         transcripcion.editadoPor = usuario;
         transcripcion.updated_at = new Date();
         transcripcion.revisado = true;
         try {
             await this.transcripcionRepository.save(transcripcion);
+            await this.createLog(usuario, logs_messages_1.logsEnum.EDITAR_TRANSCRIPCION, `El usuario ${usuario.nombre} ha corregido el minuto ${transcripcion.minuto} de la sesón ${sesion.nombre}`);
             return { ok: true, message: 'Transcripcion guardada correctamente' };
         }
         catch (error) {
             return { ok: false, message: 'Error al guardar la transcripcion' };
+        }
+    }
+    async createLog(usuario, action, descripcion) {
+        try {
+            let newLog = new logs_entity_1.Log();
+            newLog.action = action;
+            newLog.descripcion = descripcion;
+            newLog.id_usuario = usuario;
+            await this.logsRepository.save(newLog);
+            return { ok: true, message: 'Log creado con exito.' };
+        }
+        catch (error) {
+            return { ok: false, message: 'Error al crear el log.' };
         }
     }
 };
@@ -264,7 +291,9 @@ exports.TranscripcionesService = TranscripcionesService = __decorate([
     __param(1, (0, typeorm_1.InjectRepository)(logs_entity_1.Log)),
     __param(2, (0, typeorm_1.InjectRepository)(transcription_entity_1.Transcripcion)),
     __param(3, (0, typeorm_1.InjectRepository)(sesion_entity_1.Sesion)),
+    __param(4, (0, typeorm_1.InjectRepository)(comision_entity_1.Comision)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository])

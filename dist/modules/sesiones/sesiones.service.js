@@ -22,13 +22,14 @@ const comision_entity_1 = require("../comisiones/entities/comision.entity");
 const logs_entity_1 = require("../logs/entities/logs.entity");
 const transcription_entity_1 = require("../transcripciones/entities/transcription.entity");
 const telegram_service_1 = require("../telegram/telegram.service");
+const logs_messages_1 = require("../../utils/logs.messages");
 let SesionesService = class SesionesService {
-    constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, logRepository, telegramService) {
+    constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, logsRepository, telegramService) {
         this.sesionRepository = sesionRepository;
         this.usuarioRepository = usuarioRepository;
         this.comisionesRepository = comisionesRepository;
         this.transcripcionRepository = transcripcionRepository;
-        this.logRepository = logRepository;
+        this.logsRepository = logsRepository;
         this.telegramService = telegramService;
     }
     async create(createSesionDto) {
@@ -133,7 +134,7 @@ let SesionesService = class SesionesService {
         };
     }
     async findAll(usuarioLogueado, pagina, limite) {
-        const usuario = this.usuarioRepository.findOne({
+        const usuario = await this.usuarioRepository.findOne({
             where: { id: usuarioLogueado.id },
         });
         if (!usuario) {
@@ -151,7 +152,7 @@ let SesionesService = class SesionesService {
     }
     async updateStatusSesion(usuarioLogueado, sesionId, data) {
         const newStatus = data.estado;
-        const usuario = this.usuarioRepository.findOne({
+        const usuario = await this.usuarioRepository.findOne({
             where: { id: usuarioLogueado.id },
         });
         if (!usuario) {
@@ -165,10 +166,11 @@ let SesionesService = class SesionesService {
         }
         sesion.estado = newStatus;
         await this.sesionRepository.save(sesion);
+        await this.createLog(usuario, logs_messages_1.logsEnum.CAMBIAR_ESTADO_SESION, `Estado de la sesion ${sesion.nombre} actualizado a ${newStatus} por ${usuario.nombre}`);
         return { ok: true, message: 'Estado de la sesion actualizado' };
     }
     async setUsuarioToSesion(usuarioLogueado, idSesion, usuariosIds) {
-        const usuario = this.usuarioRepository.findOne({
+        const usuario = await this.usuarioRepository.findOne({
             where: { id: usuarioLogueado.id },
         });
         if (!usuario) {
@@ -192,9 +194,11 @@ let SesionesService = class SesionesService {
         await this.sesionRepository.save(sesion);
         if (usuarioEliminado !== null && usuarios.length > 0) {
             await this.asignarTranscripcionesDeleteUsuario(sesion, usuarioEliminado);
+            await this.createLog(usuario, logs_messages_1.logsEnum.ASIGNAR_TRANSCRIPCION, `Usuario eliminado de la sesion ${sesion.nombre} por ${usuario.nombre}`);
         }
         else {
             await this.asignarTranscripcionesAddUsuario(sesion);
+            await this.createLog(usuario, logs_messages_1.logsEnum.ASIGNAR_TRANSCRIPCION, `Usuarios agregados a la sesion ${sesion.nombre} por ${usuario.nombre}`);
         }
         return { ok: true, message: 'Usuarios agregados a la sesion' };
     }
@@ -284,7 +288,7 @@ let SesionesService = class SesionesService {
         }
     }
     async deleteSesion(usuarioLogueado, sesionId) {
-        const usuario = this.usuarioRepository.findOne({
+        const usuario = await this.usuarioRepository.findOne({
             where: { id: usuarioLogueado.id },
         });
         if (!usuario) {
@@ -371,7 +375,21 @@ let SesionesService = class SesionesService {
         await this.sesionRepository.save(sesion);
         const message = `<strong>ATENCIÓN OPERATIVO:</strong> la transcripción de la comisión: <strong>${comision.nombre}</strong> con nombre de sesión: <strong>${sesion.nombre}</strong> está en proceso de generación de archivos, en los próximos <strong>10 minutos</strong> puede dirigirse a relatoría y realizar el envío respectivo.`;
         await this.telegramService.sendMessage(message);
+        await this.createLog(null, logs_messages_1.logsEnum.CAMBIAR_ESTADO_SESION, `Estado de la sesion ${sesion.nombre} actualizado a ${sesion_entity_1.estadoEnum.SINCRONIZADO}`);
         return { ok: true, message: 'Sesion sincronizada' };
+    }
+    async createLog(usuario, action, descripcion) {
+        try {
+            let newLog = new logs_entity_1.Log();
+            newLog.action = action;
+            newLog.descripcion = descripcion;
+            newLog.id_usuario = usuario;
+            await this.logsRepository.save(newLog);
+            return { ok: true, message: 'Log creado con exito.' };
+        }
+        catch (error) {
+            return { ok: false, message: 'Error al crear el log.' };
+        }
     }
 };
 exports.SesionesService = SesionesService;

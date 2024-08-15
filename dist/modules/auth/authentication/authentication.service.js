@@ -19,10 +19,11 @@ const error_message_1 = require("../../../utils/error.message");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const logs_entity_1 = require("../../logs/entities/logs.entity");
+const logs_messages_1 = require("../../../utils/logs.messages");
 let AuthenticationService = class AuthenticationService {
-    constructor(authcommonService, logRepository) {
+    constructor(authcommonService, logsRepository) {
         this.authcommonService = authcommonService;
-        this.logRepository = logRepository;
+        this.logsRepository = logsRepository;
     }
     async signIn(payload) {
         try {
@@ -41,6 +42,7 @@ let AuthenticationService = class AuthenticationService {
             user.createdAt = undefined;
             user.updatedAt = undefined;
             user.login_status = undefined;
+            await this.createLog(user, logs_messages_1.logsEnum.INICIAR_SESION, `Sesion iniciada por ${user.nombre}`);
             return {
                 ok: true,
                 message: "Acceso autorizado",
@@ -74,6 +76,19 @@ let AuthenticationService = class AuthenticationService {
         catch (error) {
             const message = (0, error_message_1.handleDbError)(error);
             return { message };
+        }
+    }
+    async createLog(usuario, action, descripcion) {
+        try {
+            let newLog = new logs_entity_1.Log();
+            newLog.action = action;
+            newLog.descripcion = descripcion;
+            newLog.id_usuario = usuario;
+            await this.logsRepository.save(newLog);
+            return { ok: true, message: 'Log creado con exito.' };
+        }
+        catch (error) {
+            return { ok: false, message: 'Error al crear el log.' };
         }
     }
 };

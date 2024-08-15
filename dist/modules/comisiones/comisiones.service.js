@@ -19,14 +19,17 @@ const comision_entity_1 = require("./entities/comision.entity");
 const typeorm_2 = require("typeorm");
 const usuario_entity_1 = require("../usuarios/entities/usuario.entity");
 const sesion_entity_1 = require("../sesiones/entities/sesion.entity");
+const logs_entity_1 = require("../logs/entities/logs.entity");
+const logs_messages_1 = require("../../utils/logs.messages");
 let ComisionesService = class ComisionesService {
-    constructor(comisionesRepository, usuarioRepository, sesionRepository) {
+    constructor(comisionesRepository, usuarioRepository, sesionRepository, logsRepository) {
         this.comisionesRepository = comisionesRepository;
         this.usuarioRepository = usuarioRepository;
         this.sesionRepository = sesionRepository;
+        this.logsRepository = logsRepository;
     }
     async create(createComisionDto, usuarioLogueado) {
-        const usuario = this.usuarioRepository.findOne({
+        const usuario = await this.usuarioRepository.findOne({
             where: { id: usuarioLogueado.id }
         });
         if (!usuario) {
@@ -42,14 +45,16 @@ let ComisionesService = class ComisionesService {
         newComision.nombre = createComisionDto.nombre;
         newComision.descripcion = createComisionDto.descripcion;
         newComision.prefijo = createComisionDto.prefijo;
+        newComision.puntuacion = createComisionDto.puntuacion;
         await this.comisionesRepository.save(newComision);
+        await this.createLog(usuarioLogueado, logs_messages_1.logsEnum.CREAR_COMISION, `Comision ${newComision.nombre} creada por ${usuario.nombre}`);
         return {
             ok: true,
             message: 'Comision created'
         };
     }
     async update(id, updateComisionDto, usuarioLogueado) {
-        const usuario = this.usuarioRepository.findOne({
+        const usuario = await this.usuarioRepository.findOne({
             where: { id: usuarioLogueado.id }
         });
         if (!usuario) {
@@ -62,7 +67,9 @@ let ComisionesService = class ComisionesService {
         comision.nombre = updateComisionDto.nombre;
         comision.descripcion = updateComisionDto.descripcion;
         comision.prefijo = updateComisionDto.prefijo;
+        comision.puntuacion = updateComisionDto.puntuacion;
         await this.comisionesRepository.save(comision);
+        await this.createLog(usuario, logs_messages_1.logsEnum.ACTUALIZAR_COMISION, `Comision ${comision.nombre} actualizada por ${usuario.nombre}`);
         return {
             ok: true,
             message: 'Comision actualizada con exito.'
@@ -113,7 +120,7 @@ let ComisionesService = class ComisionesService {
     }
     async comisionesAdmin(pagina, limite) {
         const [comisiones, total] = await this.comisionesRepository.createQueryBuilder('comision')
-            .select(['comision.id', 'comision.nombre', 'comision.descripcion', 'comision.prefijo'])
+            .select(['comision.id', 'comision.nombre', 'comision.descripcion', 'comision.prefijo', 'comision.puntuacion'])
             .groupBy('comision.id')
             .skip((pagina - 1) * limite)
             .take(limite)
@@ -135,6 +142,19 @@ let ComisionesService = class ComisionesService {
     }
     async findOne(id) {
     }
+    async createLog(usuario, action, descripcion) {
+        try {
+            let newLog = new logs_entity_1.Log();
+            newLog.action = action;
+            newLog.descripcion = descripcion;
+            newLog.id_usuario = usuario;
+            await this.logsRepository.save(newLog);
+            return { ok: true, message: 'Log creado con exito.' };
+        }
+        catch (error) {
+            return { ok: false, message: 'Error al crear el log.' };
+        }
+    }
 };
 exports.ComisionesService = ComisionesService;
 exports.ComisionesService = ComisionesService = __decorate([
@@ -142,7 +162,9 @@ exports.ComisionesService = ComisionesService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(comision_entity_1.Comision)),
     __param(1, (0, typeorm_1.InjectRepository)(usuario_entity_1.Usuario)),
     __param(2, (0, typeorm_1.InjectRepository)(sesion_entity_1.Sesion)),
+    __param(3, (0, typeorm_1.InjectRepository)(logs_entity_1.Log)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository])
 ], ComisionesService);

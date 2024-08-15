@@ -2,10 +2,11 @@ import { AuthenticationCommonService } from "./authentication.common.service";
 import { SigninPayload } from "../models/signin.model";
 import { Repository } from "typeorm";
 import { Log } from "src/modules/logs/entities/logs.entity";
+import { Usuario } from "src/modules/usuarios/entities/usuario.entity";
 export declare class AuthenticationService {
     private readonly authcommonService;
-    private logRepository;
-    constructor(authcommonService: AuthenticationCommonService, logRepository: Repository<Log>);
+    private logsRepository;
+    constructor(authcommonService: AuthenticationCommonService, logsRepository: Repository<Log>);
     signIn(payload: SigninPayload): Promise<{
         ok: boolean;
         message: string;
@@ -21,7 +22,7 @@ export declare class AuthenticationService {
         refreshToken: string | {
             message: string;
         };
-        user: import("../../usuarios/entities/usuario.entity").Usuario;
+        user: Usuario;
     } | {
         message: string;
         ok?: undefined;
@@ -35,11 +36,15 @@ export declare class AuthenticationService {
             message: string;
         };
         refreshToken: string;
-        user: import("../../usuarios/entities/usuario.entity").Usuario;
+        user: Usuario;
     } | {
         message: string;
         accesstoken?: undefined;
         refreshToken?: undefined;
         user?: undefined;
+    }>;
+    createLog(usuario: Usuario, action: string, descripcion: string): Promise<{
+        ok: boolean;
+        message: string;
     }>;
 }

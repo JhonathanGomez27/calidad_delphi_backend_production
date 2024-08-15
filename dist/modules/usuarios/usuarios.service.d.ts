@@ -7,8 +7,8 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 export declare class UsuariosService {
     private usuarioRepository;
     private readonly hashingService;
-    private logRepository;
-    constructor(usuarioRepository: Repository<Usuario>, hashingService: HashingService, logRepository: Repository<Log>);
+    private logsRepository;
+    constructor(usuarioRepository: Repository<Usuario>, hashingService: HashingService, logsRepository: Repository<Log>);
     onModuleInit(): Promise<void>;
     private createDefaultUser;
     create(createUsuarioDto: CreateUsuarioDto, usuarioLogueado: Usuario): Promise<{
@@ -53,6 +53,10 @@ export declare class UsuariosService {
         message: string;
     }>;
     logout(user: any): Promise<{
+        ok: boolean;
+        message: string;
+    }>;
+    createLog(usuario: Usuario, action: string, descripcion: string): Promise<{
         ok: boolean;
         message: string;
     }>;
