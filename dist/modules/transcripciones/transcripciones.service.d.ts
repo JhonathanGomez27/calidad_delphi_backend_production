@@ -71,4 +71,5 @@ export declare class TranscripcionesService {
         ok: boolean;
         message: string;
     }>;
+    cleanText(text: string): string;
 }
