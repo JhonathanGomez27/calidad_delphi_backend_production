@@ -288,9 +288,9 @@ let TranscripcionesService = class TranscripcionesService {
         const bracketedText = text.match(bracketedTextRegex);
         const numbers = text.match(numberRegex);
         let cleanedText = text.replace(/\. (\w)/g, (match, p1) => {
-            return `${p1.toLowerCase()}`;
+            return ` ${p1.toLowerCase()}`;
         });
-        cleanedText = text.replace(/\.(\w)/g, (match, p1) => {
+        cleanedText = cleanedText.replace(/\.(\w)/g, (match, p1) => {
             return ` ${p1.toLowerCase()}`;
         });
         cleanedText = cleanedText.replace(/[.,](?![^\[]*\]|(?=\d))/g, '');
