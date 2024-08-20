@@ -122,6 +122,7 @@ let ComisionesService = class ComisionesService {
         const [comisiones, total] = await this.comisionesRepository.createQueryBuilder('comision')
             .select(['comision.id', 'comision.nombre', 'comision.descripcion', 'comision.prefijo', 'comision.puntuacion'])
             .groupBy('comision.id')
+            .orderBy('comision.id', 'ASC')
             .skip((pagina - 1) * limite)
             .take(limite)
             .getManyAndCount();
