@@ -287,24 +287,19 @@ let TranscripcionesService = class TranscripcionesService {
         const numberRegex = /(?:\d{1,3})(?:[.,]\d{1,3})*(?:\.\d+)?/g;
         const bracketedText = text.match(bracketedTextRegex);
         const numbers = text.match(numberRegex);
-        let cleanedText = text.replace(/\. (\w)/g, (match, p1) => {
-            return ` ${p1.toLowerCase()}`;
+        let cleanedText = text.replace(/(?![^\[]*\])\. (\w+)/g, (match, p1) => {
+            if (!p1.match(/\d/)) {
+                return `. ${p1.toLowerCase()}`;
+            }
+            return match;
         });
-        cleanedText = cleanedText.replace(/\.(\w)/g, (match, p1) => {
-            return ` ${p1.toLowerCase()}`;
+        cleanedText = cleanedText.replace(/(?![^\[]*\])\.(\w+)/g, (match, p1) => {
+            if (!p1.match(/\d/)) {
+                return `. ${p1.toLowerCase()}`;
+            }
+            return match;
         });
         cleanedText = cleanedText.replace(/[.,](?![^\[]*\]|(?=\d))/g, '');
-        if (bracketedText) {
-            bracketedText.forEach(segment => {
-                const placeholder = segment.replace(/[.,]/g, '');
-                cleanedText = cleanedText.replace(placeholder, segment);
-            });
-        }
-        if (numbers) {
-            numbers.forEach(number => {
-                cleanedText = cleanedText.replace(number.replace(/[.,]/g, ''), number);
-            });
-        }
         return cleanedText;
     }
 };
