@@ -59,6 +59,7 @@ let SesionesService = class SesionesService {
         }
         else {
             const message = `<strong>ATENCIÓN CALIDAD:</strong> Acaba de llegar una transcripción de la comisión: <strong>${comision.nombre}</strong> con nombre de sesión: <strong>${newSesion.nombre}</strong>`;
+            await this.telegramService.sendMessage(message);
             sesionSelected = await this.sesionRepository.save(newSesion);
         }
         const entidadesTranscripcion = await Promise.all(createSesionDto.transcripcion.map(async (transcripcion) => {
