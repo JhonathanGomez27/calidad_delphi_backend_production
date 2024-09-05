@@ -21,6 +21,10 @@ declare const _default: (() => {
         token: string;
         chatId: string;
     };
+    openAi: {
+        token: string;
+        active: string;
+    };
 }) & import("@nestjs/config").ConfigFactoryKeyHost<{
     database: {
         dbname: string;
@@ -43,6 +47,10 @@ declare const _default: (() => {
     telegram: {
         token: string;
         chatId: string;
+    };
+    openAi: {
+        token: string;
+        active: string;
     };
 }>;
 export default _default;

@@ -23,14 +23,16 @@ const logs_entity_1 = require("../logs/entities/logs.entity");
 const transcription_entity_1 = require("../transcripciones/entities/transcription.entity");
 const telegram_service_1 = require("../telegram/telegram.service");
 const logs_messages_1 = require("../../utils/logs.messages");
+const puntuacion_service_1 = require("../puntuacion/puntuacion.service");
 let SesionesService = class SesionesService {
-    constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, logsRepository, telegramService) {
+    constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, logsRepository, telegramService, puntuacionService) {
         this.sesionRepository = sesionRepository;
         this.usuarioRepository = usuarioRepository;
         this.comisionesRepository = comisionesRepository;
         this.transcripcionRepository = transcripcionRepository;
         this.logsRepository = logsRepository;
         this.telegramService = telegramService;
+        this.puntuacionService = puntuacionService;
     }
     async create(createSesionDto) {
         const prefijo = createSesionDto.prefix;
@@ -57,14 +59,20 @@ let SesionesService = class SesionesService {
         }
         else {
             const message = `<strong>ATENCIÓN CALIDAD:</strong> Acaba de llegar una transcripción de la comisión: <strong>${comision.nombre}</strong> con nombre de sesión: <strong>${newSesion.nombre}</strong>`;
-            await this.telegramService.sendMessage(message);
             sesionSelected = await this.sesionRepository.save(newSesion);
         }
         const entidadesTranscripcion = await Promise.all(createSesionDto.transcripcion.map(async (transcripcion) => {
+            let textoCorregido = transcripcion.texto;
+            if (comision.puntuacion) {
+                const responsePuntuacion = await this.puntuacionService.correctPunctuation(transcripcion.texto);
+                if (responsePuntuacion.ok) {
+                    textoCorregido = responsePuntuacion.message;
+                }
+            }
             const nuevaTranscripcion = new transcription_entity_1.Transcripcion();
             nuevaTranscripcion.id_sesion = sesionSelected.id;
-            nuevaTranscripcion.textoTranscripcion = transcripcion.texto;
-            nuevaTranscripcion.textoCorregido = transcripcion.texto;
+            nuevaTranscripcion.textoTranscripcion = textoCorregido;
+            nuevaTranscripcion.textoCorregido = textoCorregido;
             nuevaTranscripcion.minuto = transcripcion.minuto;
             nuevaTranscripcion.usuario_asignado = null;
             return nuevaTranscripcion;
@@ -405,6 +413,7 @@ exports.SesionesService = SesionesService = __decorate([
         typeorm_1.Repository,
         typeorm_1.Repository,
         typeorm_1.Repository,
-        telegram_service_1.TelegramService])
+        telegram_service_1.TelegramService,
+        puntuacion_service_1.PuntuacionService])
 ], SesionesService);
 //# sourceMappingURL=sesiones.service.js.map

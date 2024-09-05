@@ -24,6 +24,10 @@ exports.default = (0, config_1.registerAs)('config', () => {
         telegram: {
             token: process.env.TELEGRAM_BOT_TOKEN,
             chatId: process.env.TELEGRAM_CHAT_ID,
+        },
+        openAi: {
+            token: process.env.OPEN_AI_API_KEY,
+            active: process.env.OPEN_AI_ACTIVE,
         }
     };
 });
