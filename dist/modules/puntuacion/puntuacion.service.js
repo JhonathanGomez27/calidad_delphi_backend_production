@@ -25,7 +25,12 @@ let PuntuacionService = class PuntuacionService {
         });
     }
     async correctPunctuation(text) {
-        const prompt = `Corrige solo la puntuación de este texto sin cambiar ninguna palabra ni su orden. Asegúrate de: 1) Usar signos de interrogación y exclamación cuando el tono lo requiera. 2) Colocar comas, puntos y otros signos de puntuación donde correspondan. 3) Usar mayúsculas únicamente al inicio de oraciones, después de puntos, y en nombres propios. No añadas, elimines ni modifiques el estilo del contenido; solo ajusta la puntuación y las mayúsculas.\n\n${text}`;
+        const prompt = `Corrige el siguiente texto para que:
+        1. Coloque mayúsculas solo en nombres propios y después de puntos.
+        2. Utilice puntos solo cuando sea estrictamente necesario, evitando el exceso.
+        3. Aplique comas únicamente cuando sean esenciales, evitando su uso excesivo.
+        4. No incluya signos de admiración, puntos suspensivos o dos puntos (:).
+        5. En las cifras, use puntos en lugar de comas.\n\n${text}`;
         try {
             const response = await this.openai.chat.completions.create({
                 model: 'gpt-4o-mini',

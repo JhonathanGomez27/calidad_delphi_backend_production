@@ -314,34 +314,19 @@ let SesionesService = class SesionesService {
         await this.sesionRepository.remove(sesion);
         return { ok: true, message: 'Sesion eliminada', totalDeleted };
     }
-    async pruebas(data) {
+    async pruebas(sesionId) {
         const sesion = await this.sesionRepository.findOne({
-            where: { id: data.sesion },
-            relations: ['usuarios'],
+            where: { id: sesionId },
         });
-        const usuarios = sesion.usuarios;
-        if (!usuarios.length) {
-            return { ok: false, message: 'No hay usuarios en la sesion', data: null };
+        if (!sesion) {
+            return { ok: false, message: 'Sesion no encontrada' };
         }
-        const minutosSesion = await this.obtenerMinutosSesion(80, usuarios.length);
-        const usuariosMinutos = [];
-        for (let i = 0; i < usuarios.length; i++) {
-            const minutos = minutosSesion[i];
-            const skip = i * (i > 0 ? minutosSesion[i - 1] : 0);
-            const [trasncripciones, total] = await this.transcripcionRepository.findAndCount({
-                where: { id_sesion: sesion.id },
-                order: { minuto: 'ASC' },
-                skip: skip,
-                take: minutos,
-            });
-            usuariosMinutos.push({ usuario: usuarios[i], minutos: trasncripciones });
-            for (let j = 0; j < trasncripciones.length; j++) {
-                const transcripcion = trasncripciones[j];
-                transcripcion.usuarioAsignado = usuarios[i];
-                await this.transcripcionRepository.save(transcripcion);
-            }
-        }
-        return { ok: true, message: 'Prueba exitosa', data: usuariosMinutos };
+        const [transcripciones, total] = await this.transcripcionRepository.findAndCount({
+            select: ['textoTranscripcion', 'minuto'],
+            where: { id_sesion: sesionId },
+            order: { minuto: 'ASC' },
+        });
+        return { ok: true, data: transcripciones, total };
     }
     async listarSesionesRevisadas(prefijo) {
         const comision = await this.comisionesRepository.findOne({

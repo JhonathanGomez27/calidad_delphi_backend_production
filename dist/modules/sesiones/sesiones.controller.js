@@ -99,11 +99,11 @@ let SesionesController = class SesionesController {
             return (0, error_message_1.handleDbError)(error);
         }
     }
-    async prueba(req, res) {
+    async prueba(req, query, res) {
         try {
-            const response = await this.sesionesService.pruebas(req.body);
+            const response = await this.sesionesService.pruebas(query.idSesion);
             if (!response.ok) {
-                return res.status(400).json({ message: response.message, ok: false, data: response.data });
+                return res.status(400).json(response);
             }
             return res.json(response);
         }
@@ -210,11 +210,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SesionesController.prototype, "deleteSesion", null);
 __decorate([
-    (0, common_1.Post)('prueba'),
+    (0, common_1.Get)('prueba'),
     __param(0, (0, common_1.Request)()),
-    __param(1, (0, common_1.Res)()),
+    __param(1, (0, common_1.Query)()),
+    __param(2, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], SesionesController.prototype, "prueba", null);
 __decorate([

@@ -81,10 +81,16 @@ export declare class SesionesService {
         message: string;
         totalDeleted: number;
     }>;
-    pruebas(data: any): Promise<{
+    pruebas(sesionId: any): Promise<{
         ok: boolean;
         message: string;
-        data: any[];
+        data?: undefined;
+        total?: undefined;
+    } | {
+        ok: boolean;
+        data: Transcripcion[];
+        total: number;
+        message?: undefined;
     }>;
     listarSesionesRevisadas(prefijo: string): Promise<{
         ok: boolean;

@@ -251,11 +251,7 @@ let TranscripcionesService = class TranscripcionesService {
             where: { id: transcripcion.id_sesion },
             relations: ['comision']
         });
-        const comision = sesion.comision;
         let textoCorregido = data.textoCorregido;
-        if (!comision.puntuacion) {
-            textoCorregido = this.cleanText(data.textoCorregido);
-        }
         transcripcion.textoCorregido = textoCorregido;
         transcripcion.editadoPor = usuario;
         transcripcion.updated_at = new Date();
