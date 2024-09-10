@@ -24,6 +24,7 @@ const transcription_entity_1 = require("../transcripciones/entities/transcriptio
 const telegram_service_1 = require("../telegram/telegram.service");
 const logs_messages_1 = require("../../utils/logs.messages");
 const puntuacion_service_1 = require("../puntuacion/puntuacion.service");
+const format_text_1 = require("../../utils/format-text");
 let SesionesService = class SesionesService {
     constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, logsRepository, telegramService, puntuacionService) {
         this.sesionRepository = sesionRepository;
@@ -63,11 +64,14 @@ let SesionesService = class SesionesService {
             sesionSelected = await this.sesionRepository.save(newSesion);
         }
         const entidadesTranscripcion = await Promise.all(createSesionDto.transcripcion.map(async (transcripcion) => {
-            let textoCorregido = transcripcion.texto;
+            let textoCorregido = (0, format_text_1.cleanText)(transcripcion.texto);
             if (comision.puntuacion) {
                 const responsePuntuacion = await this.puntuacionService.correctPunctuation(transcripcion.texto);
                 if (responsePuntuacion.ok) {
                     textoCorregido = responsePuntuacion.message;
+                }
+                else {
+                    textoCorregido = transcripcion.texto;
                 }
             }
             const nuevaTranscripcion = new transcription_entity_1.Transcripcion();
