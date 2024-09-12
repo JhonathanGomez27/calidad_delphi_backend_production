@@ -64,15 +64,9 @@ let SesionesService = class SesionesService {
             sesionSelected = await this.sesionRepository.save(newSesion);
         }
         const entidadesTranscripcion = await Promise.all(createSesionDto.transcripcion.map(async (transcripcion) => {
-            let textoCorregido = (0, format_text_1.cleanText)(transcripcion.texto);
-            if (comision.puntuacion) {
-                const responsePuntuacion = await this.puntuacionService.correctPunctuation(transcripcion.texto);
-                if (responsePuntuacion.ok) {
-                    textoCorregido = responsePuntuacion.message;
-                }
-                else {
-                    textoCorregido = transcripcion.texto;
-                }
+            let textoCorregido = transcripcion.texto;
+            if (!comision.puntuacion) {
+                textoCorregido = (0, format_text_1.cleanText)(transcripcion.texto);
             }
             const nuevaTranscripcion = new transcription_entity_1.Transcripcion();
             nuevaTranscripcion.id_sesion = sesionSelected.id;
