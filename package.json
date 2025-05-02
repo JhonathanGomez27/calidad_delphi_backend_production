@@ -37,6 +37,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "config": "^3.3.12",
+    "date-fns-tz": "^3.2.0",
     "dotenv": "^16.4.5",
     "multer": "^1.4.5-lts.1",
     "node-telegram-bot-api": "^0.66.0",

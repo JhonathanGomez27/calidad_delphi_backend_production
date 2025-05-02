@@ -23,17 +23,15 @@ const logs_entity_1 = require("../logs/entities/logs.entity");
 const transcription_entity_1 = require("../transcripciones/entities/transcription.entity");
 const telegram_service_1 = require("../telegram/telegram.service");
 const logs_messages_1 = require("../../utils/logs.messages");
-const puntuacion_service_1 = require("../puntuacion/puntuacion.service");
 const format_text_1 = require("../../utils/format-text");
 let SesionesService = class SesionesService {
-    constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, logsRepository, telegramService, puntuacionService) {
+    constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, logsRepository, telegramService) {
         this.sesionRepository = sesionRepository;
         this.usuarioRepository = usuarioRepository;
         this.comisionesRepository = comisionesRepository;
         this.transcripcionRepository = transcripcionRepository;
         this.logsRepository = logsRepository;
         this.telegramService = telegramService;
-        this.puntuacionService = puntuacionService;
     }
     async create(createSesionDto) {
         const prefijo = createSesionDto.prefix;
@@ -397,7 +395,6 @@ exports.SesionesService = SesionesService = __decorate([
         typeorm_1.Repository,
         typeorm_1.Repository,
         typeorm_1.Repository,
-        telegram_service_1.TelegramService,
-        puntuacion_service_1.PuntuacionService])
+        telegram_service_1.TelegramService])
 ], SesionesService);
 //# sourceMappingURL=sesiones.service.js.map

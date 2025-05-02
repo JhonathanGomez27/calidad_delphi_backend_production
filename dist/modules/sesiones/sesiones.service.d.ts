@@ -6,7 +6,6 @@ import { Log } from '../logs/entities/logs.entity';
 import { CreateSesionDto } from './dto/create-sesion.dto';
 import { Transcripcion } from '../transcripciones/entities/transcription.entity';
 import { TelegramService } from '../telegram/telegram.service';
-import { PuntuacionService } from '../puntuacion/puntuacion.service';
 export declare class SesionesService {
     private sesionRepository;
     private usuarioRepository;
@@ -14,8 +13,7 @@ export declare class SesionesService {
     private transcripcionRepository;
     private logsRepository;
     private readonly telegramService;
-    private readonly puntuacionService;
-    constructor(sesionRepository: Repository<Sesion>, usuarioRepository: Repository<Usuario>, comisionesRepository: Repository<Comision>, transcripcionRepository: Repository<Transcripcion>, logsRepository: Repository<Log>, telegramService: TelegramService, puntuacionService: PuntuacionService);
+    constructor(sesionRepository: Repository<Sesion>, usuarioRepository: Repository<Usuario>, comisionesRepository: Repository<Comision>, transcripcionRepository: Repository<Transcripcion>, logsRepository: Repository<Log>, telegramService: TelegramService);
     create(createSesionDto: CreateSesionDto): Promise<{
         ok: boolean;
         message: string;

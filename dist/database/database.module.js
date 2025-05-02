@@ -34,7 +34,7 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                     password: configService.get('config.database.password'),
                     database: configService.get('config.database.dbname'),
                     autoLoadEntities: true,
-                    synchronize: true,
+                    synchronize: false,
                     entities: [__dirname + '/**/*.entity{.ts,.js}'],
                 }),
             }),
