@@ -6,4 +6,5 @@ export declare class FiltersPaginatedQuery {
     fechaInicio?: Date;
     fechaFin?: Date;
     estado?: 'Sincronizado' | 'Revisado' | 'Sin calidad';
+    user_id?: number;
 }

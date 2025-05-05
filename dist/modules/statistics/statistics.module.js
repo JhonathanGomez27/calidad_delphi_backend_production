@@ -16,6 +16,7 @@ const sesion_entity_1 = require("../sesiones/entities/sesion.entity");
 const transcription_entity_1 = require("../transcripciones/entities/transcription.entity");
 const comision_entity_1 = require("../comisiones/entities/comision.entity");
 const auth_module_1 = require("../auth/auth.module");
+const utils_module_1 = require("../../utils/utils.module");
 let StatisticsModule = class StatisticsModule {
 };
 exports.StatisticsModule = StatisticsModule;
@@ -23,7 +24,7 @@ exports.StatisticsModule = StatisticsModule = __decorate([
     (0, common_1.Module)({
         imports: [
             typeorm_1.TypeOrmModule.forFeature([usuario_entity_1.Usuario, sesion_entity_1.Sesion, transcription_entity_1.Transcripcion, comision_entity_1.Comision]),
-            auth_module_1.AuthModule
+            auth_module_1.AuthModule, utils_module_1.UtilsModule
         ],
         controllers: [statistics_controller_1.StatisticsController],
         providers: [statistics_service_1.StatisticsService]

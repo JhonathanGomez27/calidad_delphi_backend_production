@@ -20,23 +20,23 @@ const sesion_entity_1 = require("../sesiones/entities/sesion.entity");
 const usuario_entity_1 = require("../usuarios/entities/usuario.entity");
 const comision_entity_1 = require("../comisiones/entities/comision.entity");
 const transcription_entity_1 = require("../transcripciones/entities/transcription.entity");
-const date_fns_tz_1 = require("date-fns-tz");
+const date_utils_service_1 = require("../../utils/date-utils.service");
 let StatisticsService = class StatisticsService {
-    constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository) {
+    constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, dateUtilsService) {
         this.sesionRepository = sesionRepository;
         this.usuarioRepository = usuarioRepository;
         this.comisionesRepository = comisionesRepository;
         this.transcripcionRepository = transcripcionRepository;
+        this.dateUtilsService = dateUtilsService;
     }
     async getStatistics(user, query) {
         try {
             const { page, limit, fechaInicio, fechaFin } = query;
-            const temp_date_1 = new Date(`${fechaInicio} 00:00:00`);
-            const temp_date_2 = new Date(`${fechaFin} 23:59:59`);
-            let startDate = (0, date_fns_tz_1.toZonedTime)(temp_date_1, 'America/Bogota');
-            let endDate = (0, date_fns_tz_1.toZonedTime)(temp_date_2, 'America/Bogota');
-            startDate = (0, date_fns_tz_1.format)(startDate, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: 'America/Bogota' });
-            endDate = (0, date_fns_tz_1.format)(endDate, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: 'America/Bogota' });
+            const fechaInicioBogota = `${fechaInicio} 00:00:00`;
+            const fechaFinBogota = `${fechaFin} 23:59:59`;
+            const startDate = this.dateUtilsService.fakeZonedTimeToUtc(fechaInicioBogota);
+            const endDate = this.dateUtilsService.fakeZonedTimeToUtc(fechaFinBogota);
+            console.log(startDate, endDate);
             const offset = (page - 1) * limit;
             const usuarios = await this.usuarioRepository.createQueryBuilder('usuario')
                 .leftJoinAndSelect('usuario.transcripcionesEditadas', 'transcripcion')
@@ -69,6 +69,74 @@ let StatisticsService = class StatisticsService {
             return { ok: false, message: 'Error al obtener las estadísticas', error };
         }
     }
+    async getTranscriptionsEditedByUser(query) {
+        try {
+            const { fechaInicio, fechaFin, user_id } = query;
+            console.log(user_id);
+            const user = await this.usuarioRepository.findOne({ where: { id: user_id } });
+            if (!user) {
+                return { ok: false, message: 'Usuario no encontrado' };
+            }
+            console.log(user);
+            const fechaInicioBogota = `${fechaInicio} 00:00:00`;
+            const fechaFinBogota = `${fechaFin} 23:59:59`;
+            const startDate = this.dateUtilsService.fakeZonedTimeToUtc(fechaInicioBogota);
+            const endDate = this.dateUtilsService.fakeZonedTimeToUtc(fechaFinBogota);
+            const transcripciones = await this.transcripcionRepository.createQueryBuilder('transcripcion')
+                .innerJoinAndSelect('transcripcion.sesion', 'sesion')
+                .where('transcripcion.editado_por = :userId', { userId: user.id })
+                .andWhere('transcripcion.updated_at BETWEEN :startDate AND :endDate', { startDate, endDate })
+                .orderBy('sesion.id', 'ASC')
+                .addOrderBy('transcripcion.updated_at', 'DESC')
+                .select([
+                'transcripcion.id AS transcripcionId',
+                'transcripcion.textoTranscripcion AS textoTranscripcion',
+                'transcripcion.textoCorregido AS textoCorregido',
+                'transcripcion.minuto AS minuto',
+                'transcripcion.updated_at AS updatedAt',
+                'sesion.nombre AS sesionNombre',
+                'sesion.fecha AS sesionFecha',
+                'sesion.duracion AS sesionDuracion',
+                'sesion.id AS sesionId',
+            ])
+                .getRawMany();
+            const total = await this.transcripcionRepository.createQueryBuilder('transcripcion')
+                .where('transcripcion.editado_por = :userId', { userId: user.id })
+                .andWhere('transcripcion.updated_at BETWEEN :startDate AND :endDate', { startDate, endDate })
+                .getCount();
+            const agrupadasPorSesion = transcripciones.reduce((result, transcripcion) => {
+                const sesionId = transcripcion.sesionid;
+                if (!result[sesionId]) {
+                    result[sesionId] = {
+                        sesionId: transcripcion.sesionid,
+                        sesionNombre: transcripcion.sesionnombre,
+                        sesionFecha: transcripcion.sesionfecha,
+                        sesionDuracion: transcripcion.sesionduracion,
+                        transcripciones: [],
+                    };
+                }
+                result[sesionId].transcripciones.push({
+                    transcripcionId: transcripcion.transcripcionid,
+                    textoTranscripcion: transcripcion.textotranscripcion,
+                    textoCorregido: transcripcion.textocorregido,
+                    minuto: transcripcion.minuto,
+                    updatedAt: this.dateUtilsService.utcDateToLocal(new Date(transcripcion.updatedat)),
+                });
+                return result;
+            }, {});
+            const sesiones = Object.values(agrupadasPorSesion);
+            return {
+                ok: true,
+                message: 'Transcripciones obtenidas correctamente',
+                sesiones,
+                total
+            };
+        }
+        catch (error) {
+            console.error(error);
+            return { ok: false, message: 'Error al obtener las estadísticas', error };
+        }
+    }
 };
 exports.StatisticsService = StatisticsService;
 exports.StatisticsService = StatisticsService = __decorate([
@@ -80,6 +148,7 @@ exports.StatisticsService = StatisticsService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        date_utils_service_1.DateUtilsService])
 ], StatisticsService);
 //# sourceMappingURL=statistics.service.js.map

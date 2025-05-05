@@ -18,13 +18,13 @@ exports.FiltersPaginatedQuery = FiltersPaginatedQuery;
 __decorate([
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(1),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], FiltersPaginatedQuery.prototype, "page", void 0);
 __decorate([
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(1),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], FiltersPaginatedQuery.prototype, "limit", void 0);
 __decorate([
@@ -57,4 +57,8 @@ __decorate([
     (0, class_validator_1.IsIn)(['Sincronizado', 'Revisado', 'Sin calidad']),
     __metadata("design:type", String)
 ], FiltersPaginatedQuery.prototype, "estado", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], FiltersPaginatedQuery.prototype, "user_id", void 0);
 //# sourceMappingURL=filtersPaginatedQuery.js.map
