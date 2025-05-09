@@ -15,6 +15,7 @@ var TelegramService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TelegramService = void 0;
 const common_1 = require("@nestjs/common");
+const TelegramBot = require("node-telegram-bot-api");
 const config_1 = require("../../config");
 let TelegramService = TelegramService_1 = class TelegramService {
     constructor(configService) {
@@ -24,6 +25,10 @@ let TelegramService = TelegramService_1 = class TelegramService {
         this.chatId = configService.telegram.chatId;
     }
     onModuleInit() {
+        if (TelegramService_1.bot) {
+            return;
+        }
+        TelegramService_1.bot = new TelegramBot(this.token, { polling: true });
     }
     async sendMessage(message) {
         try {
@@ -31,6 +36,7 @@ let TelegramService = TelegramService_1 = class TelegramService {
             console.log('Mensaje enviado con éxito:', response.text);
         }
         catch (error) {
+            console.log(error);
             console.error('Error enviando el mensaje');
         }
     }
