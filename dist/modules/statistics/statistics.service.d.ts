@@ -25,6 +25,19 @@ export declare class StatisticsService {
         usuarios?: undefined;
         total?: undefined;
     }>;
+    getStatisticsFilter(user: Usuario, query: any): Promise<{
+        ok: boolean;
+        message: string;
+        usuarios: any[];
+        total: number;
+        error?: undefined;
+    } | {
+        ok: boolean;
+        message: string;
+        error: any;
+        usuarios?: undefined;
+        total?: undefined;
+    }>;
     getTranscriptionsEditedByUser(query: FiltersPaginatedQuery): Promise<{
         ok: boolean;
         message: string;
@@ -43,5 +56,10 @@ export declare class StatisticsService {
         error: any;
         sesiones?: undefined;
         total?: undefined;
+    }>;
+    getStisticsByUser(query: FiltersPaginatedQuery): Promise<{
+        ok: boolean;
+        message: string;
+        error: any;
     }>;
 }

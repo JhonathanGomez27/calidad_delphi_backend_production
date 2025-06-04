@@ -21,6 +21,7 @@ const usuario_entity_1 = require("../usuarios/entities/usuario.entity");
 const comision_entity_1 = require("../comisiones/entities/comision.entity");
 const transcription_entity_1 = require("../transcripciones/entities/transcription.entity");
 const date_utils_service_1 = require("../../utils/date-utils.service");
+const roles_model_1 = require("../auth/models/roles.model");
 let StatisticsService = class StatisticsService {
     constructor(sesionRepository, usuarioRepository, comisionesRepository, transcripcionRepository, dateUtilsService) {
         this.sesionRepository = sesionRepository;
@@ -36,7 +37,6 @@ let StatisticsService = class StatisticsService {
             const fechaFinBogota = `${fechaFin} 23:59:59`;
             const startDate = this.dateUtilsService.fakeZonedTimeToUtc(fechaInicioBogota);
             const endDate = this.dateUtilsService.fakeZonedTimeToUtc(fechaFinBogota);
-            console.log(startDate, endDate);
             const offset = (page - 1) * limit;
             const usuarios = await this.usuarioRepository.createQueryBuilder('usuario')
                 .leftJoinAndSelect('usuario.transcripcionesEditadas', 'transcripcion')
@@ -69,15 +69,60 @@ let StatisticsService = class StatisticsService {
             return { ok: false, message: 'Error al obtener las estadísticas', error };
         }
     }
+    async getStatisticsFilter(user, query) {
+        try {
+            const { page, limit, fechaInicio, fechaFin } = query;
+            const fechaInicioBogota = `${fechaInicio} 00:00:00`;
+            const fechaFinBogota = `${fechaFin} 23:59:59`;
+            const startDate = this.dateUtilsService.fakeZonedTimeToUtc(fechaInicioBogota);
+            const endDate = this.dateUtilsService.fakeZonedTimeToUtc(fechaFinBogota);
+            const offset = (page - 1) * limit;
+            const queryBuilder = this.usuarioRepository.createQueryBuilder('usuario')
+                .leftJoinAndSelect('usuario.transcripcionesEditadas', 'transcripcion')
+                .where('transcripcion.updated_at BETWEEN :startDate AND :endDate', { startDate, endDate });
+            if (user.rol !== roles_model_1.Role.ADMIN && user.rol !== roles_model_1.Role.SUPERVISOR) {
+                queryBuilder.andWhere('usuario.id = :userId', { userId: user.id });
+            }
+            const usuarios = await queryBuilder
+                .select([
+                'usuario.id AS usuarioId',
+                'usuario.nombre AS usuarioNombre',
+                'COUNT(transcripcion.id) AS totalTranscripciones'
+            ])
+                .groupBy('usuario.id, usuario.nombre')
+                .orderBy('totalTranscripciones', 'DESC')
+                .limit(limit)
+                .offset(offset)
+                .getRawMany();
+            const totalQueryBuilder = this.usuarioRepository.createQueryBuilder('usuario')
+                .leftJoinAndSelect('usuario.transcripcionesEditadas', 'transcripcion')
+                .where('transcripcion.updated_at BETWEEN :startDate AND :endDate', { startDate, endDate });
+            if (user.rol !== roles_model_1.Role.ADMIN && user.rol !== roles_model_1.Role.SUPERVISOR) {
+                totalQueryBuilder.andWhere('usuario.id = :userId', { userId: user.id });
+            }
+            const total = await totalQueryBuilder
+                .select([
+                'usuario.id AS usuarioId',
+                'usuario.nombre AS usuarioNombre',
+                'COUNT(transcripcion.id) AS totalTranscripciones',
+            ])
+                .orderBy('totalTranscripciones', 'DESC')
+                .groupBy('usuario.id')
+                .getCount();
+            return { ok: true, message: 'Estadísticas obtenidas correctamente', usuarios, total };
+        }
+        catch (error) {
+            console.log(error);
+            return { ok: false, message: 'Error al obtener las estadísticas', error };
+        }
+    }
     async getTranscriptionsEditedByUser(query) {
         try {
             const { fechaInicio, fechaFin, user_id } = query;
-            console.log(user_id);
             const user = await this.usuarioRepository.findOne({ where: { id: user_id } });
             if (!user) {
                 return { ok: false, message: 'Usuario no encontrado' };
             }
-            console.log(user);
             const fechaInicioBogota = `${fechaInicio} 00:00:00`;
             const fechaFinBogota = `${fechaFin} 23:59:59`;
             const startDate = this.dateUtilsService.fakeZonedTimeToUtc(fechaInicioBogota);
@@ -131,6 +176,14 @@ let StatisticsService = class StatisticsService {
                 sesiones,
                 total
             };
+        }
+        catch (error) {
+            console.error(error);
+            return { ok: false, message: 'Error al obtener las estadísticas', error };
+        }
+    }
+    async getStisticsByUser(query) {
+        try {
         }
         catch (error) {
             console.error(error);

@@ -29,7 +29,7 @@ let StatisticsController = class StatisticsController {
     }
     async getStatistics(req, query, res) {
         try {
-            const response = await this.statisticsService.getStatistics(req.user, query);
+            const response = await this.statisticsService.getStatisticsFilter(req.user, query);
             if (!response.ok) {
                 return res.status(400).json({ message: response.message, ok: false });
             }
@@ -94,7 +94,7 @@ let StatisticsController = class StatisticsController {
 };
 exports.StatisticsController = StatisticsController;
 __decorate([
-    (0, decorators_1.Roles)(roles_model_1.Role.ADMIN, roles_model_1.Role.SUPERVISOR),
+    (0, decorators_1.Roles)(roles_model_1.Role.ADMIN, roles_model_1.Role.SUPERVISOR, roles_model_1.Role.AUDITOR),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthAccessGuard, roles_guard_1.RolesGuard),
     (0, common_1.Get)(''),
     (0, swagger_1.ApiQuery)({ name: 'pagina', required: false }),
@@ -109,7 +109,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], StatisticsController.prototype, "getStatistics", null);
 __decorate([
-    (0, decorators_1.Roles)(roles_model_1.Role.ADMIN, roles_model_1.Role.SUPERVISOR),
+    (0, decorators_1.Roles)(roles_model_1.Role.ADMIN, roles_model_1.Role.SUPERVISOR, roles_model_1.Role.AUDITOR),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthAccessGuard, roles_guard_1.RolesGuard),
     (0, common_1.Get)('user'),
     (0, swagger_1.ApiQuery)({ name: 'fechaInicio', required: false }),
